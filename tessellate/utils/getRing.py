@@ -1,7 +1,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.DEBUG)
 
 #| common class ordering of ring systems for 5,6 rings
 common5rings = [("C2'", "C3'", "C4'", "O4'", "C1'"), ("C2R", "C3R", "C4R", "O4R", "C1R")]
@@ -182,7 +182,7 @@ def getring(startatom, atomset):
                                         break
                         return chosen
                     else:  # ignore path
-                        logger.debug("getRING pass on intersection %s is size %i", intersection, len(intersection))
+                        logger.error("getRING pass on intersection %s is size %i", intersection, len(intersection))
                         pass
             else:
                 logger.debug("subnode=root %s %s", subnodes, root)
@@ -214,8 +214,12 @@ def create_graph_and_find_rings_suite(atomlist, mineuclid=1.1, maxeuclid=2.0):
     SSSR=[]
     SSSR1=getRing.create_graph_and_find_rings_d3069(atomlist,mineuclid,maxeuclid) 
     SSSR2=getRing.create_graph_and_find_rings_6abb(atomlist,mineuclid,maxeuclid)
+    SSSR3=getRing.create_graph_and_find_rings_old(atomlist,mineuclid,maxeuclid)
     SSSR.extend(SSSR1)
     for itm in SSSR2:
+        if itm not in SSSR:
+            SSSR.extend([itm])
+    for itm in SSSR3:
         if itm not in SSSR:
             SSSR.extend([itm])
     return SSSR
@@ -292,7 +296,7 @@ def create_graph_and_find_rings_d3069(atomlist, mineuclid=1.1, maxeuclid=2.0):
                         logger.debug("ring from getring %s", ring)
                         if len(ring) > 0:
                             if ring in SSSR:  # if exists then ignore, not sorting as a unique ring is being offered by getRing
-                                logger.debug("ring already in SSSR %s %i %s", ring, len(ring),type(ring))
+                                logger.error("ring already in SSSR %s %i %s", ring, len(ring),type(ring))
                                 pass
                             else:
                                 SSSR.append(ring)
@@ -304,6 +308,7 @@ def create_graph_and_find_rings_d3069(atomlist, mineuclid=1.1, maxeuclid=2.0):
                             logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
                             edges[bondtobreak].remove(N2)
                         except:
+                            logger.error("N2 not eliminated")
                             pass
 
                 elif getRing.min_degree(edges)[1] == int(3) and N3nodes:  # the minimum degree of the entire graph
@@ -326,6 +331,7 @@ def create_graph_and_find_rings_d3069(atomlist, mineuclid=1.1, maxeuclid=2.0):
                             logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
                             edges[bondtobreak].remove(N3)
                         except Exception as e:
+                            logger.error(e)
                             print(e)
     if SSSR:
         logger.debug("SSSR %s", SSSR)
@@ -404,6 +410,7 @@ def create_graph_and_find_rings_old(atomlist, mineuclid=1.1, maxeuclid=2.0):
                             logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
                             edges[bondtobreak].remove(N2)
                         except:
+                            logger.error("Couldn't eliminate N2")
                             pass
 
                 elif getRing.min_degree(edges)[1] == int(3):  # the minimum degree of the entire graph
@@ -520,10 +527,8 @@ def create_graph_and_find_rings_6abb(atomlist, mineuclid=1.1, maxeuclid=2.0):
                         logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
                         edges[bondtobreak].remove(N3)
                     except Exception as e:
+                        logger.error(e)
                         print(e)
     if SSSR:
         logger.debug("SSSR %s", SSSR)
     return SSSR
-
-
-

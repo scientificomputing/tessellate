@@ -136,15 +136,20 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
         print("Error - Cannot import module ", e)
         exit(1)
 
-    # code smell - should be able to use a single object , a dict with lists?
     all_pucker_json = helperfunctions.init_all_pucker_dictionary()
     all_macro_pucker_json = helperfunctions.init_all_pucker_dictionary()
-    PDBDATA = {}
-    nodejson = []
+    #PDBDATA = {}
 
-    outputfile = open(os.path.join(working_folder, outputfile), 'w')
-    outputfile.write(
+    outputfile = ".".join([outputfile, output_format])
+    txt = False
+    if output_format == "txt":
+        txt = True
+        outputfile = open(os.path.join(working_folder, outputfile), 'w')
+        outputfile.write("tessellate 0.1 txt\n")
+        outputfile.write(
         "PDBID RESNAME CHAIN RESID RINGATOMSORDER CONFORMER CONTEXTUAL_CONFORMER ANGULAR_PUCKER_COORDS ORIG_CONFORMER RING_SIZE\n")
+        logger.critical("to be improved, does not match json output at present")
+    nodejson = []
 
     # . read in list of pdbs to read (format is one column of pdb ids
     pdblist = []
@@ -181,6 +186,14 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
                           len(chunked), numrings, ringsize)
     logger.debug("Ligand Dict used: %s", ligand_dict)
 
+    #. ignore these residues
+    aminoacids = ["GLY", "ALA", "SER", "MET", "LYS", "GLU", "PRO", "ASP", "VAL", "PHE", "ASN", "ILE", "TRP",
+                          "CYS", "HIS", "LEU", "GLN", "ARG", "TYR", "THR"]
+    water = ["HOH"]
+    other = []
+    soup = aminoacids + water + other
+    
+
     # . download pdbs  and if already there will not download
     for pdbid in pdblist:
         logger.debug('Ids in downloads list %s', pdbid)
@@ -203,12 +216,6 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
         for resi in res_list:
             SSSR = []
             rname = resi.get_resname()
-            # if not an amino acid then look for ring
-            aminoacids = ["GLY", "ALA", "SER", "MET", "LYS", "GLU", "PRO", "ASP", "VAL", "PHE", "ASN", "ILE", "TRP",
-                          "CYS", "HIS", "LEU", "GLN", "ARG", "TYR", "THR"]
-            water = ["HOH"]
-            soup = aminoacids + water
-
             # .. is this residue in the ligands list, calc pucker
             if rname in ligand_dict.keys():
                 logger.debug('Ligand %s appears in the ligand dict ', rname)
@@ -228,7 +235,6 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
                             logger.debug('Missing atoms for %s', rname)
                             pass  # without notifying user !
                         else:
-
                             for atomindex in range(0, ligand_dict[rname]["ringsize"]):
                                 listallcoors = listallcoors + list(
                                     resi[ligand_dict[rname]["ringids"][nrings][atomindex]].get_coord())
@@ -236,42 +242,45 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
                             if pobj and pobj.isvalid:
                                 try:
                                     thisframeTD = pobj.calculate_triangular_tessellation()
+                                    logger.debug(thisframeTD)
                                     conformer = pobj.deduce_canonical_conformation()
                                     nextconformer = pobj.deduce_canonical_conformation(nextguess=True)
                                     pconf = pobj.contextualise_conformer(conformer[0],ligand_dict[rname]["ringids"][nrings])
                                     node, log = createnodejson(pdbid, rname, resi.get_parent().get_id(), resi.get_id()[1], ligand_dict[rname]["ringids"][nrings],conformer[0], pconf, thisframeTD, nextconformer[0], pobj.ringsize)
                                     logger.info(log)
-                                    outputfile.write(log)
+                                    if txt:
+                                        outputfile.write(log)
                                     if not nodejson == [] and node in nodejson:
                                         logger.debug('ENTRY EXISTS : %s %s', rname, resi.get_id()[1])
                                     else:
                                         nodejson.append(node)
 
-                                    ring = ligand_dict[rname]["ringids"][nrings]
+                                    #ring = ligand_dict[rname]["ringids"][nrings]
+
                                     #. AVOID ADDING DUPLICATES
-                                    pdbdata_entry = dict(chain=resi.get_parent().get_id(), resi=rname, resid=resi.get_id()[1], atoms=ring,
-                                                        conformer=conformer[0], TD=thisframeTD)
-                                    if pdbid in PDBDATA:
-                                        # now check for dups
-                                        if pdbdata_entry in PDBDATA[pdbid]:
-                                            logger.debug('ENTRY EXISTS : %s %s', rname, resi.get_id()[1])
-                                        else:
-                                            PDBDATA[pdbid].append(
-                                                {"chain" : resi.get_parent().get_id(), "resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
-                                                "TD": thisframeTD})
-                                            if conformer[0] in all_pucker_json[pobj.ringsize]:
-                                                all_pucker_json[pobj.ringsize][conformer[0]] += 1
-                                            else:
-                                                all_pucker_json[pobj.ringsize][conformer[0]] = 1
-    
-                                    else:
-                                            if conformer[0] in all_pucker_json[pobj.ringsize]:
-                                                all_pucker_json[pobj.ringsize][conformer[0]] += 1
-                                            else:
-                                                all_pucker_json[pobj.ringsize][conformer[0]] = 1
-                                            PDBDATA[pdbid] = [
-                                                {"chain" : resi.get_parent().get_id(),"resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
-                                                "TD": thisframeTD}]
+                                    # pdbdata_entry = dict(chain=resi.get_parent().get_id(), resi=rname, resid=resi.get_id()[1], atoms=ring,
+                                    #                     conformer=conformer[0], TD=thisframeTD)
+                                    # if pdbid in PDBDATA:
+                                    #     # now check for dups
+                                    #     if pdbdata_entry in PDBDATA[pdbid]:
+                                    #         logger.debug('ENTRY EXISTS : %s %s', rname, resi.get_id()[1])
+                                    #     else:
+                                    #         PDBDATA[pdbid].append(
+                                    #             {"chain" : resi.get_parent().get_id(), "resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
+                                    #             "TD": thisframeTD})
+                                    #         if conformer[0] in all_pucker_json[pobj.ringsize]:
+                                    #             all_pucker_json[pobj.ringsize][conformer[0]] += 1
+                                    #         else:
+                                    #             all_pucker_json[pobj.ringsize][conformer[0]] = 1
+                                    #
+                                    # else:
+                                    #         if conformer[0] in all_pucker_json[pobj.ringsize]:
+                                    #             all_pucker_json[pobj.ringsize][conformer[0]] += 1
+                                    #         else:
+                                    #             all_pucker_json[pobj.ringsize][conformer[0]] = 1
+                                    #         PDBDATA[pdbid] = [
+                                    #             {"chain" : resi.get_parent().get_id(),"resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
+                                    #             "TD": thisframeTD}]
                                 except Exception as e:
                                     logger.error('In known ligs, Pucker object valid, but calc, classify etc. failed  %s %s', str(pobj._coords), e)
                                     raise e
@@ -297,7 +306,7 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
                 for i in resi.get_list():
                     atomlist.append([i.get_name(), i.get_coord()])
                 logger.debug("resi %s atomlist %s", resi, atomlist)
-                SSSR = getRing.create_graph_and_find_rings_suite(atomlist)
+                SSSR = getRing.create_graph_and_find_rings_suite(atomlist,mineuclid=1.0,maxeuclid=2.2)
 
                 if SSSR:
                     for ring in SSSR:
@@ -324,40 +333,41 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
                                 nextconformer = pobj.deduce_canonical_conformation(nextguess=True)
                                 node, log = createnodejson(pdbid, rname, resi.get_parent().get_id(), resi.get_id()[1], ring, conformer[0], pconf, thisframeTD, nextconformer[0], pobj.ringsize)
                                 logger.info(log)
-                                outputfile.write(log)
+                                if txt:
+                                    outputfile.write(log)
                                 if not nodejson == [] and node in nodejson:
                                     logger.debug('ENTRY EXISTS : %s %s', rname, resi.get_id()[1])
                                 else:
                                     nodejson.append(node)
                                 #. AVOID ADDING DUPLICATES
-                                pdbdata_entry = dict(chain=resi.get_parent().get_id(), resi=rname, resid=resi.get_id()[1], atoms=ring,
-                                                     conformer=conformer[0], TD=thisframeTD)
-                                if pdbid in PDBDATA:
-                                    # now check for dups
-                                    if pdbdata_entry in PDBDATA[pdbid]:
-                                        logger.debug('ENTRY EXISTS : %s %s', rname, resi.get_id()[1])
-                                    else:
-                                        PDBDATA[pdbid].append(
-                                            {"chain" : resi.get_parent().get_id(), "resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
-                                             "TD": thisframeTD})
-                                        if conformer[0] in all_pucker_json[pobj.ringsize]:
-                                            all_pucker_json[pobj.ringsize][conformer[0]] += 1
-                                        else:
-                                            all_pucker_json[pobj.ringsize][conformer[0]] = 1
-
-                                else:
-                                        if conformer[0] in all_pucker_json[pobj.ringsize]:
-                                            all_pucker_json[pobj.ringsize][conformer[0]] += 1
-                                        else:
-                                            all_pucker_json[pobj.ringsize][conformer[0]] = 1
-                                        PDBDATA[pdbid] = [
-                                            {"chain" : resi.get_parent().get_id(),"resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
-                                            "TD": thisframeTD}]
+                                # pdbdata_entry = dict(chain=resi.get_parent().get_id(), resi=rname, resid=resi.get_id()[1], atoms=ring,
+                                #                      conformer=conformer[0], TD=thisframeTD)
+                                # if pdbid in PDBDATA:
+                                #     # now check for dups
+                                #     if pdbdata_entry in PDBDATA[pdbid]:
+                                #         logger.debug('ENTRY EXISTS : %s %s', rname, resi.get_id()[1])
+                                #     else:
+                                #         PDBDATA[pdbid].append(
+                                #             {"chain" : resi.get_parent().get_id(), "resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
+                                #              "TD": thisframeTD})
+                                #         if conformer[0] in all_pucker_json[pobj.ringsize]:
+                                #             all_pucker_json[pobj.ringsize][conformer[0]] += 1
+                                #         else:
+                                #             all_pucker_json[pobj.ringsize][conformer[0]] = 1
+                                #
+                                # else:
+                                #         if conformer[0] in all_pucker_json[pobj.ringsize]:
+                                #             all_pucker_json[pobj.ringsize][conformer[0]] += 1
+                                #         else:
+                                #             all_pucker_json[pobj.ringsize][conformer[0]] = 1
+                                #         PDBDATA[pdbid] = [
+                                #             {"chain" : resi.get_parent().get_id(),"resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
+                                #             "TD": thisframeTD}]
                             except Exception as e:
                                 logger.error('In SSSR Pucker object valid, but calc, classify etc. failed  %s %s', str(pobj._coords), e)
                                 raise e
                         else:
-                            logger.error("pobj is None or not valid in SSSR ring find %s", listallcoors)
+                            logger.error("pobj is None or not valid in SSSR ring find %s %s %s %s", listallcoors,rname,resi.get_id()[1], ring)
                 else:
                     logger.debug('%s has no rings', rname)
 
@@ -382,8 +392,9 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
                     #for a, b in itertools.combinations(macroatomlist, 2):
                     # work out euclidean distance and choose to call this an edge if mineuclid<dist<maxeuclid
                         #print a, b, np.linalg.norm(a[1] - b[1])
-
-                    macroSSSR = getRing.create_graph_and_find_rings_suite(macroatomlist,maxeuclid=6.0)
+                    logger.debug("Macroatoms list %s",macroatomlist)
+                    macroSSSR = getRing.create_graph_and_find_rings_suite(macroatomlist,maxeuclid=8.0)
+                    logger.debug(macroSSSR)
                     if macroSSSR:
                         #print "mS ", macroSSSR
                         for ring in macroSSSR:
@@ -415,42 +426,43 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
                                     logger.debug("Macrocycles %s %s %s %s", thisframeTD, conformer, pconf, nextconformer)
                                     node, log = createnodejson(pdbid, rname, resi.get_parent().get_id(), resi.get_id()[1], ring, conformer[0], pconf, thisframeTD, nextconformer[0], pobj.ringsize, True)
                                     logger.info(log)
-                                    outputfile.write(log)
+                                    if txt:
+                                        outputfile.write(log)
                                     if not nodejson == [] and node in nodejson:
                                         logger.debug('ENTRY EXISTS : %s %s', rname, resi.get_id()[1])
                                     else:
                                         nodejson.append(node)
                                     #. AVOID ADDING DUPLICATES
-                                    pdbdata_entry = dict(chain=resi.get_parent().get_id(), resi=rname, resid=resi.get_id()[1], atoms=ring,
-                                                     conformer=conformer[0], TD=thisframeTD)
-                                    if pdbid in PDBDATA:
-                                        # now check for dups
-                                        if pdbdata_entry in PDBDATA[pdbid]:
-                                            logger.debug('ENTRY EXISTS : %s %s', rname, resi.get_id()[1])
-                                        else:
-                                            PDBDATA[pdbid].append(
-                                                {"chain":resi.get_parent().get_id(), "resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
-                                                "TD": thisframeTD})
-                                            if conformer[0] in all_macro_pucker_json[pobj.ringsize]:
-                                                all_macro_pucker_json[pobj.ringsize][conformer[0]] += 1
-                                            else:
-                                                all_macro_pucker_json[pobj.ringsize][conformer[0]] = 1
-    
-                                    else:
-                                            if conformer[0] in all_macro_pucker_json[pobj.ringsize]:
-                                                all_macro_pucker_json[pobj.ringsize][conformer[0]] += 1
-                                            else:
-                                                all_macro_pucker_json[pobj.ringsize][conformer[0]] = 1
-                                            PDBDATA[pdbid] = [
-                                                {"chain":resi.get_parent().get_id(),"resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
-                                                "TD": thisframeTD}]
+                                    # pdbdata_entry = dict(chain=resi.get_parent().get_id(), resi=rname, resid=resi.get_id()[1], atoms=ring,
+                                    #                  conformer=conformer[0], TD=thisframeTD)
+                                    # if pdbid in PDBDATA:
+                                    #     # now check for dups
+                                    #     if pdbdata_entry in PDBDATA[pdbid]:
+                                    #         logger.debug('ENTRY EXISTS : %s %s', rname, resi.get_id()[1])
+                                    #     else:
+                                    #         PDBDATA[pdbid].append(
+                                    #             {"chain":resi.get_parent().get_id(), "resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
+                                    #             "TD": thisframeTD})
+                                    #         if conformer[0] in all_macro_pucker_json[pobj.ringsize]:
+                                    #             all_macro_pucker_json[pobj.ringsize][conformer[0]] += 1
+                                    #         else:
+                                    #             all_macro_pucker_json[pobj.ringsize][conformer[0]] = 1
+                                    #
+                                    # else:
+                                    #         if conformer[0] in all_macro_pucker_json[pobj.ringsize]:
+                                    #             all_macro_pucker_json[pobj.ringsize][conformer[0]] += 1
+                                    #         else:
+                                    #             all_macro_pucker_json[pobj.ringsize][conformer[0]] = 1
+                                    #         PDBDATA[pdbid] = [
+                                    #             {"chain":resi.get_parent().get_id(),"resi": rname, "resid": resi.get_id()[1], "atoms": ring, "conformer": conformer[0],
+                                    #             "TD": thisframeTD}]
                                 except Exception as e:
                                     logger.error('In macrocyc, Pucker object valid, but calc, classify etc. failed  %s %s', str(pobj._coords), e)
                                     pass
                             else:
                                 logger.error("pobj is None or not valid in macrocyc %s",listallcoors)
                     else:
-                        logger.debug('%s has no rings', rname)
+                        logger.debug('%s has no macro rings', rname)
 
 
 
@@ -466,88 +478,82 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, logfile
     # for each item in dict. calc c.o.m.,
     # create edges between items if 1.5 < dist < 6 (actually should check connectivity, but not yet
 
-    pucsummary = open(os.path.join(working_folder, 'pucker_summary.csv'), 'w')
-    pucsummary.write("size,conformer,count\n")
-    for key in all_pucker_json[5]:
-        pucsummary.write(",".join(("FIVE", key, str(all_pucker_json[5][key]), "\n")))
-        try:
-            all_pucker_json["five"].append({"label": key, "macrovalue": float(all_macro_pucker_json[5][key]), "value": float(all_pucker_json[5][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(5,key), "color_aster":helperfunctions.getcolor(5,key)})
-        except:
-            all_pucker_json["five"] = [{"label": key, "macrovalue": float(all_macro_pucker_json[5][key]), "value": float(all_pucker_json[5][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(5,key), "color_aster":helperfunctions.getcolor(5,key)}]
-
-    for key in all_pucker_json[6]:
-        pucsummary.write(",".join(("SIX", key, str(all_pucker_json[6][key]), "\n")))
-        try:
-            #all_pucker_json["six"].append({"label": key, "value": float(all_pucker_json[6][key])})
-            all_pucker_json["six"].append({"label": key, "macrovalue": float(all_macro_pucker_json[6][key]), "value": float(all_pucker_json[6][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(6,key), "color_aster":helperfunctions.getcolor(6,key)})
-        except:
-            all_pucker_json["six"] = [{"label": key, "macrovalue": float(all_macro_pucker_json[6][key]), "value": float(all_pucker_json[6][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(6,key), "color_aster":helperfunctions.getcolor(6,key)}]
-    for key in all_pucker_json[7]:
-        pucsummary.write(",".join(("SEVEN", key, str(all_pucker_json[7][key]), "\n")))
-        try:
-            #all_pucker_json["seven"].append({"label": key, "value": float(all_pucker_json[7][key])})
-            all_pucker_json["seven"].append({"label": key, "macrovalue": float(all_macro_pucker_json[7][key]), "value": float(all_pucker_json[7][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(7,key), "color_aster":helperfunctions.getcolor(7,key)})
-        except:
-            #all_pucker_json["seven"] = [{"label": key, "value": float(all_pucker_json[7][key])}]
-            all_pucker_json["seven"] = [{"label": key, "macrovalue": float(all_macro_pucker_json[7][key]), "value": float(all_pucker_json[7][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(7,key), "color_aster":helperfunctions.getcolor(7,key)}]
-    for key in all_pucker_json[8]:
-        pucsummary.write(",".join(("EIGHT", key, str(all_pucker_json[8][key]), "\n")))
-        try:
-            #all_pucker_json["eight"].append({"label": key, "value": float(all_pucker_json[8][key])})
-            all_pucker_json["eight"].append({"label": key, "macrovalue": float(all_macro_pucker_json[8][key]), "value": float(all_pucker_json[8][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(8,key), "color_aster":helperfunctions.getcolor(8,key)})
-        except:
-            #all_pucker_json["eight"] = [{"label": key, "value": float(all_pucker_json[8][key])}]
-            all_pucker_json["eight"] = [{"label": key, "macrovalue": float(all_macro_pucker_json[8][key]), "value": float(all_pucker_json[8][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(8,key), "color_aster":helperfunctions.getcolor(8,key)}]
-    pucsummary.close()
-    # <> dump all the pucker stats as json files
-    d2 = [key for key in all_pucker_json["five"]]
-    #d2 = {"data": [key for key in nodejson]}
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'five.json'))
-    #d2 = [key for key in all_pucker_json["six"]]
-    d2 = [key for key in sorted(all_pucker_json["six"], key=lambda dist: dist["order"] )]
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'six.json'))
-    #d2 = [key for key in all_pucker_json["seven"]]
-    d2 = [key for key in sorted(all_pucker_json["seven"], key=lambda dist: dist["order"] )]
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'seven.json'))
-    #d2 = [key for key in all_pucker_json["eight"]]
-    d2 = [key for key in sorted(all_pucker_json["eight"], key=lambda dist: dist["order"] )]
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'eight.json'))
-
-    # <> dump pucker stats out to be used in discrete bar charts, if value is not a float then graph doesn't work properly "1" -> 1.0
-    d2 = [{'key': 'five cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["five"]]}]
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'five_bar.json'))
-    d2 = [{'key': 'six cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["six"]]}]
-    #d2 = [{ 'key' : 'six cycles', "color": "#d67777", 'values' : [sorted([(key,value) for (key,value) in all_pucker_json["six"]])]} ]
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'six_bar.json'))
-    d2 = [{'key': 'seven cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["seven"]]}]
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'seven_bar.json'))
-    d2 = [{'key': 'eight cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["eight"]]}]
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'eight_bar.json'))
-
-    d = {"name": "PDB", "children": [{'name': key, "children": value} for key, value in PDBDATA.items()]}
-    helperfunctions.write_to_json(d, os.path.join(working_folder, 'pucker_flare.json'))
-
-    d2 = {"five": [key for key in sorted(all_pucker_json["five"], key=lambda dist: dist["order"] )],"six": [key for key in sorted(all_pucker_json["six"], key=lambda dist: dist["order"] )],"seven": [key for key in sorted(all_pucker_json["seven"], key=lambda dist: dist["order"] )],"eight": [key for key in sorted(all_pucker_json["eight"], key=lambda dist: dist["order"] )]}
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'aster.json'))
+    # pucsummary = open(os.path.join(working_folder, 'pucker_summary.csv'), 'w')
+    # pucsummary.write("size,conformer,count\n")
+    # for key in all_pucker_json[5]:
+    #     pucsummary.write(",".join(("FIVE", key, str(all_pucker_json[5][key]), "\n")))
+    #     try:
+    #         all_pucker_json["five"].append({"label": key, "macrovalue": float(all_macro_pucker_json[5][key]), "value": float(all_pucker_json[5][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(5,key), "color_aster":helperfunctions.getcolor(5,key)})
+    #     except:
+    #         all_pucker_json["five"] = [{"label": key, "macrovalue": float(all_macro_pucker_json[5][key]), "value": float(all_pucker_json[5][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(5,key), "color_aster":helperfunctions.getcolor(5,key)}]
+    #
+    # for key in all_pucker_json[6]:
+    #     pucsummary.write(",".join(("SIX", key, str(all_pucker_json[6][key]), "\n")))
+    #     try:
+    #         #all_pucker_json["six"].append({"label": key, "value": float(all_pucker_json[6][key])})
+    #         all_pucker_json["six"].append({"label": key, "macrovalue": float(all_macro_pucker_json[6][key]), "value": float(all_pucker_json[6][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(6,key), "color_aster":helperfunctions.getcolor(6,key)})
+    #     except:
+    #         all_pucker_json["six"] = [{"label": key, "macrovalue": float(all_macro_pucker_json[6][key]), "value": float(all_pucker_json[6][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(6,key), "color_aster":helperfunctions.getcolor(6,key)}]
+    # for key in all_pucker_json[7]:
+    #     pucsummary.write(",".join(("SEVEN", key, str(all_pucker_json[7][key]), "\n")))
+    #     try:
+    #         #all_pucker_json["seven"].append({"label": key, "value": float(all_pucker_json[7][key])})
+    #         all_pucker_json["seven"].append({"label": key, "macrovalue": float(all_macro_pucker_json[7][key]), "value": float(all_pucker_json[7][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(7,key), "color_aster":helperfunctions.getcolor(7,key)})
+    #     except:
+    #         #all_pucker_json["seven"] = [{"label": key, "value": float(all_pucker_json[7][key])}]
+    #         all_pucker_json["seven"] = [{"label": key, "macrovalue": float(all_macro_pucker_json[7][key]), "value": float(all_pucker_json[7][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(7,key), "color_aster":helperfunctions.getcolor(7,key)}]
+    # for key in all_pucker_json[8]:
+    #     pucsummary.write(",".join(("EIGHT", key, str(all_pucker_json[8][key]), "\n")))
+    #     try:
+    #         #all_pucker_json["eight"].append({"label": key, "value": float(all_pucker_json[8][key])})
+    #         all_pucker_json["eight"].append({"label": key, "macrovalue": float(all_macro_pucker_json[8][key]), "value": float(all_pucker_json[8][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(8,key), "color_aster":helperfunctions.getcolor(8,key)})
+    #     except:
+    #         #all_pucker_json["eight"] = [{"label": key, "value": float(all_pucker_json[8][key])}]
+    #         all_pucker_json["eight"] = [{"label": key, "macrovalue": float(all_macro_pucker_json[8][key]), "value": float(all_pucker_json[8][key]), "id": key, "weight": 1,"order": helperfunctions.getorder(8,key), "color_aster":helperfunctions.getcolor(8,key)}]
+    # pucsummary.close()
+    # # <> dump all the pucker stats as json files
+    # d2 = [key for key in all_pucker_json["five"]]
+    # #d2 = {"data": [key for key in nodejson]}
+    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'five.json'))
+    # #d2 = [key for key in all_pucker_json["six"]]
+    # d2 = [key for key in sorted(all_pucker_json["six"], key=lambda dist: dist["order"] )]
+    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'six.json'))
+    # #d2 = [key for key in all_pucker_json["seven"]]
+    # d2 = [key for key in sorted(all_pucker_json["seven"], key=lambda dist: dist["order"] )]
+    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'seven.json'))
+    # #d2 = [key for key in all_pucker_json["eight"]]
+    # d2 = [key for key in sorted(all_pucker_json["eight"], key=lambda dist: dist["order"] )]
+    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'eight.json'))
+    #
+    # # <> dump pucker stats out to be used in discrete bar charts, if value is not a float then graph doesn't work properly "1" -> 1.0
+    # d2 = [{'key': 'five cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["five"]]}]
+    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'five_bar.json'))
+    # d2 = [{'key': 'six cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["six"]]}]
+    # #d2 = [{ 'key' : 'six cycles', "color": "#d67777", 'values' : [sorted([(key,value) for (key,value) in all_pucker_json["six"]])]} ]
+    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'six_bar.json'))
+    # d2 = [{'key': 'seven cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["seven"]]}]
+    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'seven_bar.json'))
+    # d2 = [{'key': 'eight cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["eight"]]}]
+    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'eight_bar.json'))
+    #
+    # d = {"name": "PDB", "children": [{'name': key, "children": value} for key, value in PDBDATA.items()]}
+    # helperfunctions.write_to_json(d, os.path.join(working_folder, 'pucker_flare.json'))
+    #
+    # d2 = {"five": [key for key in sorted(all_pucker_json["five"], key=lambda dist: dist["order"] )],"six": [key for key in sorted(all_pucker_json["six"], key=lambda dist: dist["order"] )],"seven": [key for key in sorted(all_pucker_json["seven"], key=lambda dist: dist["order"] )],"eight": [key for key in sorted(all_pucker_json["eight"], key=lambda dist: dist["order"] )]}
+    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'aster.json'))
 
     # JSONTABLEDATA
-    #d2 = {"data":[{{k:i}for k,i in key.items()} for key in nodejson]}
-    d2 = [key for key in nodejson]
-    helperfunctions.write_to_json(d2, os.path.join(working_folder, 'pucker_table.json'))
-    print("puckertable:", d2)
-    print( os.getcwd())
+    if output_format == "json":
+        d2 = [key for key in nodejson]
+        helperfunctions.write_to_json(d2, os.path.join(working_folder, 'pucker_table.json'))
+    #logger.debug("puckertable %s ", d2)
+    # logger.debug(os.getcwd())
+
     inputfile.close()
-    outputfile.close()
-    logger.debug("all_pucker_json %s", all_pucker_json)
-    logger.debug("PDBDATA %s", PDBDATA)
-    logger.debug("nodejson %s", nodejson)
+
+    if txt:
+        outputfile.close()
+    #logger.debug("all_pucker_json %s", all_pucker_json)
+    #logger.debug("PDBDATA %s", PDBDATA)
+    #logger.debug("nodejson %s", nodejson)
     return
-
-if __name__ == "__main__":
-    try:
-        import sys
-    except Exception as e:
-        print("Error - Cannot import module ", e)
-        exit(1)
-    analyse_pucker_from_pdbs(sys.argv[1], sys.argv[2], sys.argv[3])
-
