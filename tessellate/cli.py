@@ -94,6 +94,12 @@ def main(input_dir, input_format, output_format, ignore, ignore_behaviour, ignor
     if input_format == "builtin":
         logger.critical("Treating input_dir as a file: %s", input_dir)
         tt.analyse_pucker(input_dir[0], output_format=output_format)
+    elif input_format == "pdb":
+        logger.critical("Treating input_dir as a file: %s", input_dir)
+        tt.analyse_pucker_from_pdbs(input_dir[0], output_format=output_format)
+    elif input_format == "pdblist":
+        logger.critical("Treating input_dir as a file: %s", input_dir)
+        tt.analyse_pucker_from_pdbs(input_dir[0], output_format=output_format)
     else:
         logger.critical("Code not yet developed for this function")
         exit(1)
