@@ -34,7 +34,8 @@ setup(
     author="Christopher Bevan Barnett",
     author_email='chrisbarnettster@gmail.com',
     url='https://github.com/chrisbarnettster/tessellate',
-    packages=find_packages(include=['tessellate']),
+    # packages=find_packages(include=['tessellate']),
+    packages=find_packages(),
     entry_points={
         'console_scripts': [
             'tessellate=tessellate.cli:main'
