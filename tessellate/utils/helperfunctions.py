@@ -7,6 +7,7 @@ def write_to_json(data, output, the_indent=4):
     import json
     j2 = json.dumps(data, indent=the_indent)
     f2 = open(output, 'w')
+    f2.write("tessellate 0.1 json\n")
     print(j2, file=f2)
     f2.close()
 
@@ -20,9 +21,7 @@ def write_to_bson(data, output):
     j2 = bson.dumps(datadict)
     f2 = open(output, 'w')
     print(j2, file=f2)
-
-
-f2.close()
+    f2.close()
 
 import colorsys
 

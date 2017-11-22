@@ -39,17 +39,15 @@ def analyse_pucker(inputfile, outputfile="output_of_analyse", output_format="jso
         print("Error - Cannot import module %s", e)
         exit(1)
 
-    all_pucker_json = helperfunctions.init_all_pucker_dictionary()
-    PDATA = {}
     outputfile = ".".join([outputfile, output_format])
     txt = False
     if output_format == "txt":
         txt = True
         outputfile = open(os.path.join(working_folder, outputfile), 'w')
+        outputfile.write("tessellate 0.1 txt\n")
         outputfile.write(
             "PUCKER_COORDS CONFORMER ORIG_CONFORMER RING_SIZE\n")
         logger.critical("to be improved, does not match json output at present")
-
     nodejson = []
 
     # - does the list of coordinates exist
@@ -80,104 +78,11 @@ def analyse_pucker(inputfile, outputfile="output_of_analyse", output_format="jso
                 if txt:
                     outputfile.write(log)
                 nodejson.append(node)
-                # try:
-                #     all_pucker_json[pobj.ringsize][conformer[0]] += 1
-                # except:
-                #     all_pucker_json[pobj.ringsize][conformer[0]] = 1
-
-                # create data for visualisation
-                # try:
-                #     PDATA[id].append(
-                #         {"conformer": conformer[0],
-                #          "TD": thisframeTD})
-                # except:
-                #     PDATA[id] = [
-                #         {"conformer": conformer[0],
-                #          "TD": thisframeTD}]
 
             except Exception as e:
                 logger.error('Pucker object valid, but calc, classify etc. failed  %s %s', str(pobj._coords), e)
                 raise e
                 pass
-
-    # <> how to make a csv
-    # pucsummary = open('pucker_summary.csv', 'w')
-    # pucsummary.write("size,conformer,count\n")
-    # for key in all_pucker_json[5]:
-    #     pucsummary.write(",".join(("FIVE", key, str(all_pucker_json[5][key]), "\n")))
-    #     try:
-    #         all_pucker_json["five"].append(
-    #             {"label": key, "value": float(all_pucker_json[5][key]), "id": key, "weight": 1,
-    #              "order": helperfunctions.getorder(5, key), "color_aster": helperfunctions.getcolor(5, key)})
-    #     except:
-    #         all_pucker_json["five"] = [{"label": key, "value": float(all_pucker_json[5][key]), "id": key, "weight": 1,
-    #                                     "order": helperfunctions.getorder(5, key),
-    #                                     "color_aster": helperfunctions.getcolor(5, key)}]
-    #
-    # for key in all_pucker_json[6]:
-    #     pucsummary.write(",".join(("SIX", key, str(all_pucker_json[6][key]), "\n")))
-    #     try:
-    #         all_pucker_json["six"].append(
-    #             {"label": key, "value": float(all_pucker_json[6][key]), "id": key, "weight": 1,
-    #              "order": helperfunctions.getorder(6, key), "color_aster": helperfunctions.getcolor(6, key)})
-    #     except:
-    #         all_pucker_json["six"] = [{"label": key, "value": float(all_pucker_json[6][key]), "id": key, "weight": 1,
-    #                                    "order": helperfunctions.getorder(6, key),
-    #                                    "color_aster": helperfunctions.getcolor(6, key)}]
-    # for key in all_pucker_json[7]:
-    #     pucsummary.write(",".join(("SEVEN", key, str(all_pucker_json[7][key]), "\n")))
-    #     try:
-    #         # all_pucker_json["seven"].append({"label": key, "value": str(all_pucker_json[7][key])})
-    #         all_pucker_json["seven"].append(
-    #             {"label": key, "value": float(all_pucker_json[7][key]), "id": key, "weight": 1,
-    #              "order": helperfunctions.getorder(7, key), "color_aster": helperfunctions.getcolor(7, key)})
-    #     except:
-    #         # all_pucker_json["seven"] = [{"label": key, "value": str(all_pucker_json[7][key])}]
-    #         all_pucker_json["seven"] = [{"label": key, "value": float(all_pucker_json[7][key]), "id": key, "weight": 1,
-    #                                      "order": helperfunctions.getorder(7, key),
-    #                                      "color_aster": helperfunctions.getcolor(7, key)}]
-    # for key in all_pucker_json[8]:
-    #     pucsummary.write(",".join(("EIGHT", key, str(all_pucker_json[8][key]), "\n")))
-    #     try:
-    #         # all_pucker_json["eight"].append({"label": key, "value": str(all_pucker_json[8][key])})
-    #         all_pucker_json["eight"].append(
-    #             {"label": key, "value": float(all_pucker_json[8][key]), "id": key, "weight": 1,
-    #              "order": helperfunctions.getorder(8, key), "color_aster": helperfunctions.getcolor(8, key)})
-    #     except:
-    #         # all_pucker_json["eight"] = [{"label": key, "value": str(all_pucker_json[8][key])}]
-    #         all_pucker_json["eight"] = [{"label": key, "value": float(all_pucker_json[8][key]), "id": key, "weight": 1,
-    #                                      "order": helperfunctions.getorder(8, key),
-    #                                      "color_aster": helperfunctions.getcolor(8, key)}]
-    # pucsummary.close()
-    # <>  dump all the pucker stats as json files
-    # d2 = [key for key in all_pucker_json["five"]]
-    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'five.json'))
-    # d2 = [key for key in all_pucker_json["six"]]
-    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'six.json'))
-    # d2 = [key for key in all_pucker_json["seven"]]
-    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'seven.json'))
-    # d2 = [key for key in all_pucker_json["eight"]]
-    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'eight.json'))
-    #
-    # # <> dump pucker stats out to be used in discrete bar charts, if value is not a float then graph doesn't work properly "1" -> 1.0
-    # d2 = [{'key': 'five cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["five"]]}]
-    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'five_bar.json'))
-    # d2 = [{'key': 'six cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["six"]]}]
-    # # d2 = [{ 'key' : 'six cycles', "color": "#d67777", 'values' : [sorted([(key,value) for (key,value) in all_pucker_json["six"]])]} ]
-    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'six_bar.json'))
-    # d2 = [{'key': 'seven cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["seven"]]}]
-    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'seven_bar.json'))
-    # d2 = [{'key': 'eight cycles', "color": "#d67777", 'values': [key for key in all_pucker_json["eight"]]}]
-    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'eight_bar.json'))
-    #
-    # d = {"name": "PDB", "children": [{'name': key, "children": value} for key, value in PDATA.items()]}
-    # helperfunctions.write_to_json(d, os.path.join(working_folder, 'pucker_flare.json'))
-
-    # d2 = {"five": [key for key in sorted(all_pucker_json["five"], key=lambda dist: dist["order"])],
-    #       "six": [key for key in sorted(all_pucker_json["six"], key=lambda dist: dist["order"])],
-    #       "seven": [key for key in sorted(all_pucker_json["seven"], key=lambda dist: dist["order"])],
-    #       "eight": [key for key in sorted(all_pucker_json["eight"], key=lambda dist: dist["order"])]}
-    # helperfunctions.write_to_json(d2, os.path.join(working_folder, 'aster.json'))
 
     if output_format == "json":
         d2 = [key for key in nodejson]
