@@ -2,32 +2,40 @@ __author__ = 'cbarnett'
 try:
     import numpy as np
     import math
+    import logging
+
 except Exception as e:
     print("Error - Cannot import module: %s", e)
     exit(1)
 
+logger = logging.getLogger(__name__)
+logger.critical(logger.getEffectiveLevel())
+
+
+# logger.setLevel(level='DEBUG')
 
 def calctt_pucker(atomiccoorsstring, noa):
     """
-    Calculate Triangular Tessellation for 5-8 mem pucker
+    Calculate Triangular Tessellation for 5-8 mem pucker.
     """
     # the numberofatoms variable is being used an error check,
     # as I can clearly work this out from the number of atomiccoords
     global obj, obj
+    if type(noa) != type(int):
+        logging.warning("Number of atoms not an integer, casting to an int: %s", noa)
+        noa = int(noa)
     if not (len(atomiccoorsstring.split()) / 3 == noa):
-        print("Error :  Coords and supposed number of atoms, do not match")
-        raise ValueError
-    print(type(noa))
+        logger.error("Coords and supposed number of atoms, do not match")
+        exit(1)
     atoms = np.zeros((noa + 1, 3), dtype='float64')
     r = np.zeros((noa, 3), dtype='float64')
     a = np.zeros((noa - 3, 3), dtype='float64')
     p = np.zeros((noa, 3), dtype='float64')
     q = np.zeros((noa - 3, 3), dtype='float64')
-    # print atomiccoorsstring
+    logger.debug("Atom coordinate string %s", atomiccoorsstring)
     prepend = ["text"]
     sline = atomiccoorsstring.split()
     sline = prepend + sline
-    #print sline
     if noa == 5:
         for i in range(4, 16, 3):
             atoms[int((i - 4) / 3)] = tofloat(sline[i:i + 3])
@@ -35,22 +43,21 @@ def calctt_pucker(atomiccoorsstring, noa):
             atoms[int((i - 1) / 3 + 4)] = tofloat(sline[i:i + 3])
     elif noa == 6:
         for i in range(4, 19, 3):
-            atoms[(i - 4) / 3] = tofloat(sline[i:i + 3])
+            atoms[int((i - 4) / 3)] = tofloat(sline[i:i + 3])
         for i in range(1, 7, 3):
-            atoms[(i - 1) / 3 + 5] = tofloat(sline[i:i + 3])
+            atoms[int((i - 1) / 3 + 5)] = tofloat(sline[i:i + 3])
     elif noa == 7:
         for i in range(4, 20, 3):
-            atoms[(i - 4) / 3] = tofloat(sline[i:i + 3])
+            atoms[int((i - 4) / 3)] = tofloat(sline[i:i + 3])
         for i in range(1, 7, 3):
-            atoms[(i - 1) / 3 + 6] = tofloat(sline[i:i + 3])
+            atoms[int((i - 1) / 3 + 6)] = tofloat(sline[i:i + 3])
     elif noa == 8:
         for i in range(4, 23, 3):
-            atoms[(i - 4) / 3] = tofloat(sline[i:i + 3])
+            atoms[int((i - 4) / 3)] = tofloat(sline[i:i + 3])
         for i in range(1, 7, 3):
-            atoms[(i - 1) / 3 + 7] = tofloat(sline[i:i + 3])
-    # noinspection PyUnresolvedReferences
+            atoms[int((i - 1) / 3 + 7)] = tofloat(sline[i:i + 3])
     center = np.add.reduce(atoms[0:noa]) / noa
-    #print "center",center
+    logger.debug("Center is %s", center)
     atoms = atoms - center
     for i in range(0, noa):
         r[i] = atoms[i + 1] - atoms[i]
@@ -103,8 +110,7 @@ def calctt_pucker(atomiccoorsstring, noa):
 
 
 def tofloat(a):
-    """  parse string list/tuple to float list
-    """
+    """  parse string list/tuple to float list """
     b = []
     for i in a:
         b.append(float(i))
@@ -112,8 +118,7 @@ def tofloat(a):
 
 
 def rmsd(V, W):
-    """ Calculate Root-mean-square deviation from two sets of vectors V and W.
-    """
+    """ Calculate Root-mean-square deviation from two sets of vectors V and W. """
     D = len(V[0])
     N = len(V)
     rmsd = 0.0
@@ -177,13 +182,15 @@ def kabsch(P, Q):
 
 
 class Pucker(object):
+    """ Ring pucker calculation module"""
+
     def __init__(self, arg):
         self._coords = arg
         if len(self._coords) < 15 or len(self._coords) > 24:
             self._coords = None
             self._ringsize = None
             return
-        self.ringsize = int(len(arg) / 3)  # working in ints so this rounds.
+        self.ringsize = int(len(arg) / 3)  # working in int so this rounds.
         self._calculatedtt = None
         initoptions = {5: self._init5, 6: self._init6, 7: self._init7, 8: self._init8}
         initoptions[self._ringsize]()
@@ -285,7 +292,6 @@ class Pucker(object):
                      '7Czz-8': 'C  ', '7TBz-4': 'TB ', '7TS3-8': 'TS3', '7TS3-9': 'TS3', '7TBz-5': 'TB ',
                      '7Bzz-14': 'B  ', '7TS3-3': 'TS3', '7TS3-1': 'TS3', '7Bzz-10': 'B  ', '7Bzz-11': 'B  ',
                      '7Bzz-12': 'B  ', '7Bzz-13': 'B  ', '7TS3-2': 'TS3', '7TBz-7': 'TB ', '7TBz-1': 'TB ', 'P': 'P'}
-
 
     def _init8(self):
         self._fmt = '%8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f'
@@ -486,9 +492,9 @@ class Pucker(object):
         """Return canonical conf, delx,dely,del*, dist"""
         confoptions = {5: self._conf5, 6: self._conf6, 7: self._conf7, 8: self._conf8}
         if self._calculatedtt is not None:
-            return confoptions[self._ringsize](self._calculatedtt, oldbehaviour,nextguess)
+            return confoptions[self._ringsize](self._calculatedtt, oldbehaviour, nextguess)
         else:
-            return confoptions[self._ringsize](self.calculate_triangular_tessellation(), oldbehaviour,nextguess)
+            return confoptions[self._ringsize](self.calculate_triangular_tessellation(), oldbehaviour, nextguess)
 
     def _conf5(self, tupin, oldbehaviour=False, nextguess=False):
         """ Return canonical conf, delx,dely, shortest perp dist, square dist"""
@@ -513,9 +519,13 @@ class Pucker(object):
                 # return planar from list
                 return ma[0]
             else:
+                logger.debug(
+                    "Return UAP conformer as conformer is almost planar but not quite within the error margins: %s",
+                    ma[0])
                 return "UAP", 0.0, 0.0, 0.0
         else:
             # pop first item from list to be destroyed
+            logger.debug("Popping first item to be destroyed as it does not meet conditions: %s", ma[0])
             ma.pop()
 
         # now use the shortest deviation to resort the first four items..
@@ -523,7 +533,7 @@ class Pucker(object):
         ma3 = sorted(ma2, key=lambda dist: dist[3])
         if ma3[0][3] > 3.5 and oldbehaviour:
             return "UAS", 0.0, 0.0, 0.0
-        if (nextguess) and (ma[0][4] > 13.0): #hardcoded parameter :(
+        if (nextguess) and (ma[0][4] > 13.0):  # hardcoded parameter :(
             return ma3[1]
         return ma3[0]
 
@@ -539,15 +549,20 @@ class Pucker(object):
             py = math.sqrt(x * x + y * y + z * z)
             listofdiff.append((key, x, y, z, py))
         ma = sorted(listofdiff, key=lambda dist: dist[4])
-        #if deviations from planar then
+        # if deviations from planar then
         if (ma[0][0] == "P") and (ma[0][4] > 13.0):
-        # deviations from planar that are not negligible (especially for macrocycles where the radius of the cycle is large)
+            # deviations from planar that are not negligible (especially for macrocycles where the radius of the cycle is large)
+            logger.debug(
+                "deviations from planar that are not negligible (especially for macrocycles where the radius of the cycle is large). Ignore %s , return %s",
+                ma[0], ma[1])
             return ma[1]
 
         if oldbehaviour:
             return ma[0]
 
-        if (nextguess) and (ma[0][4] > 13.0): #hardcoded parameter which is map dependent :(
+        if (nextguess) and (ma[0][4] > 13.0):  # hardcoded parameter which is map dependent :(
+            logger.debug("deviations that are not negligible and nextguess set to true. Ignore %s , return %s", ma[0],
+                         ma[1])
             return ma[1]
 
         return ma[0]
@@ -567,10 +582,15 @@ class Pucker(object):
         ma = sorted(listofdiff, key=lambda dist: dist[5])
         if (ma[0][0] == "P") and (ma[0][5] > 11.0):
             # deviations from planar that are not negligible (especially for macrocycles where the radius of the cycle is large)
+            logger.debug(
+                "deviations from planar that are not negligible (especially for macrocycles where the radius of the cycle is large). Ignore %s , return %s",
+                ma[0], ma[1])
             return ma[1]
         if oldbehaviour:
             return ma[0]
-        if (nextguess) and (ma[0][5] > 13.0): #hardcoded parameter which is map dependent :(
+        if (nextguess) and (ma[0][5] > 13.0):  # hardcoded parameter which is map dependent :(
+            logger.debug("deviations that are not negligible and nextguess set to true. Ignore %s , return %s", ma[0],
+                         ma[1])
             return ma[1]
         return ma[0]
 
@@ -590,10 +610,15 @@ class Pucker(object):
         ma = sorted(listofdiff, key=lambda dist: dist[6])
         if (ma[0][0] == "P") and (ma[0][5] > 11.0):
             # deviations from planar that are not negligible (especially for macrocycles where the radius of the cycle is large)
+            logger.debug(
+                "deviations from planar that are not negligible (especially for macrocycles where the radius of the cycle is large). Ignore %s , return %s",
+                ma[0], ma[1])
             return ma[1]
         if oldbehaviour:
             return ma[0]
-        if (nextguess) and (ma[0][6] > 13.0): #hardcoded parameter which is map dependent :(
+        if (nextguess) and (ma[0][6] > 13.0):  # hardcoded parameter which is map dependent :(
+            logger.debug("deviations that are not negligible and nextguess set to true. Ignore %s , return %s", ma[0],
+                         ma[1])
             return ma[1]
         return ma[0]
 
@@ -605,6 +630,7 @@ class Pucker(object):
     def _cont5(self, conformer, ring):
         """docstring for contextualise conformer 5 """
         ordering = {'2': ring[0], '3': ring[1], '4': ring[2], '5': ring[3], '1': ring[4]}
+        # . note this choice is based on the string length and name inside conformer e.g. UAS, 1T2, P etc.
         if len(conformer) > 2:
             if conformer[0] == 'U':
                 return conformer
@@ -621,6 +647,7 @@ class Pucker(object):
     def _cont6(self, conformer, ring):
         """docstring for contextualise conformer 6 """
         ordering = {'3': ring[0], '4': ring[1], '5': ring[2], '6': ring[3], '1': ring[4], '2': ring[5]}
+        # . note this choice is based on the string length and name inside conformer e.g. 1C4, 1T2, P etc.
         if len(conformer) > 2:
             if conformer[0] == 'B':
                 return ''.join(['|B|', ordering[conformer[1]], ordering[conformer[2]]])
@@ -668,7 +695,6 @@ class Pucker(object):
             P -= Pc
             Q -= Qc
             return kabsch(P, Q)
-
 
     @property
     def fmt(self):
@@ -720,21 +746,24 @@ class Pucker(object):
 
 
 if __name__ == '__main__':
-    from pucker import Pucker
+    # from pucker import Pucker
 
-    print( "Proper Unit tests are in tests, run using PyCharm")
-    print( "Non-definitive examples below :")
+    print("Proper Unit tests are in tests, run using PyCharm")
+    print("Non-definitive examples below :")
     examples = [Pucker((
-    -2.060182, 0.212443, -0.286206, -1.612655, -0.195526, 1.185520, -1.469215, 1.164065, 1.933079, -1.873591, 2.217447,
-    1.020096, -1.910382, 1.749863, -0.358366))]
+        -2.060182, 0.212443, -0.286206, -1.612655, -0.195526, 1.185520, -1.469215, 1.164065, 1.933079, -1.873591,
+        2.217447,
+        1.020096, -1.910382, 1.749863, -0.358366))]
     examples.append(Pucker((
-    -3.904, -4.906, 3.181, -3.576, -3.540, 3.944, -4.115, -3.556, 5.339, -5.551, -3.941, 5.380, -5.799, -5.308, 4.847,
-    -5.383, -5.328, 3.394)))
+        -3.904, -4.906, 3.181, -3.576, -3.540, 3.944, -4.115, -3.556, 5.339, -5.551, -3.941, 5.380, -5.799, -5.308,
+        4.847,
+        -5.383, -5.328, 3.394)))
     examples.append(Pucker((
-    1.41314, -0.58963, 0.00000, 0.65034, -0.87437, 1.29569, -0.67974, -0.11113, 1.43779, -0.67974, 1.27340, 0.77848,
-    -0.67974, 1.27340, -0.77848, -0.67974, -0.11113, -1.43779, 0.65034, -0.87437, -1.29569)))
+        1.41314, -0.58963, 0.00000, 0.65034, -0.87437, 1.29569, -0.67974, -0.11113, 1.43779, -0.67974, 1.27340, 0.77848,
+        -0.67974, 1.27340, -0.77848, -0.67974, -0.11113, -1.43779, 0.65034, -0.87437, -1.29569)))
     examples.append(Pucker((
-    1.31918, 1.31918, 0.00000, 0.00000, 1.53627, 0.75830, -1.31918, 1.31918, 0.00000, -1.53627, 0.00000, -0.75830,
-    -1.31918, -1.31918, 0.00000, 0.00000, -1.53627, 0.75830, 1.31918, -1.31918, 0.00000, 1.53627, 0.00000, -0.75830)))
+        1.31918, 1.31918, 0.00000, 0.00000, 1.53627, 0.75830, -1.31918, 1.31918, 0.00000, -1.53627, 0.00000, -0.75830,
+        -1.31918, -1.31918, 0.00000, 0.00000, -1.53627, 0.75830, 1.31918, -1.31918, 0.00000, 1.53627, 0.00000,
+        -0.75830)))
     for ring in examples:
-        print( ring.deduce_canonical_conformation())
+        print(ring.deduce_canonical_conformation())

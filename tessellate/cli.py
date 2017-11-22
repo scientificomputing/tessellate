@@ -53,7 +53,7 @@ import click
 # )
 
 def main(input_dir, input_format, output_format, ignore, ignore_behaviour, ignore_file, ligand, ligand_behaviour,
-               ligand_file, verbose, quiet):
+         ligand_file, verbose, quiet):
     """Console script for tessellate."""
     # click.echo('Logging %s !' % project)
     click.echo('Logging %s !' % input_dir)
@@ -67,31 +67,33 @@ def main(input_dir, input_format, output_format, ignore, ignore_behaviour, ignor
     click.echo('Logging %s !' % ligand_file)
     click.echo('Logging verbose %s !' % verbose)
     click.echo('Logging quiet %s !' % quiet)
+    import tessellate.tessellate as tt
     import logging
     logger = logging.getLogger(__name__)
-    logger.setLevel(level='WARNING')  # . show WARNING and worse by default
+
+    # . making logging changes here only affects this function - all other modules read the init.
     if quiet:
-        logger.setLevel(level='ERROR')  # . only show errors and above
+        logger.critical("Changing to ERROR level, doesn't propagate")
+        logger.setLevel(level=logging.ERROR)  # . only show errors and above
 
     if verbose > 0:  # https://docs.python.org/3/library/logging.html#levels
-
-        logger.setLevel(level='DEBUG')  # show debug and worse
+        logger.critical("Changing to DEBUG level, doesn't propagate")
+        logger.setLevel(level=logging.DEBUG)  # show debug and worse
 
     logger.critical('Critical Logging on  %s !' % input_dir)
     logger.error('Error Logging on  %s !' % input_dir)
     logger.warning('Warning Logging on %s' % input_dir)
     logger.info('Info Logging on  %s !' % input_dir)
     logger.debug('Debug Logging on  %s !' % input_dir)
-    import tessellate.tessellate as tt
 
-    #. Check input dir exists
-    if input_dir=="" or input_dir==None:
+    # . Check input dir exists
+    if input_dir == "" or input_dir == None:
         logger.critical("No input_dir defined")
         exit(1)
-    #. If builtin format call the appropriate function
-    if input_format=="builtin":
+    # . If builtin format call the appropriate function
+    if input_format == "builtin":
         logger.critical("Treating input_dir as a file: %s", input_dir)
-        tt.analyse_pucker(input_dir[0])
+        tt.analyse_pucker(input_dir[0], output_format=output_format)
     else:
         logger.critical("Code not yet developed for this function")
         exit(1)
