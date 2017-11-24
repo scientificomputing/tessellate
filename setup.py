@@ -28,13 +28,14 @@ test_requirements = [
 
 setup(
     name='tessellate',
-    version='0.1.0',
+    version='0.3.0',
     description="A package for quantifying cyclic molecule conformations.",
     long_description=readme + '\n\n' + history,
     author="Christopher Bevan Barnett",
     author_email='chrisbarnettster@gmail.com',
     url='https://github.com/chrisbarnettster/tessellate',
-    packages=find_packages(include=['tessellate']),
+    # packages=find_packages(include=['tessellate']),
+    packages=find_packages(),
     entry_points={
         'console_scripts': [
             'tessellate=tessellate.cli:main'
@@ -50,9 +51,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
@@ -61,4 +59,5 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     setup_requires=setup_requirements,
+    python_requires='>=3',
 )
