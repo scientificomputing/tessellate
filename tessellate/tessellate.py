@@ -395,7 +395,7 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, outputf
 
     if output_format == "json":
         d2 = [key for key in nodejson]
-        helperfunctions.write_to_json(d2, os.path.join(output_dir, outputfile))
+        helperfunctions.write_to_json(d2, os.path.join(output_dir, outputfile),input_format="pdblist")
 
     inputfile.close()
 

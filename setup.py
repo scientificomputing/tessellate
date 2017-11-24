@@ -13,10 +13,23 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.0',
+    'numpy',
+    'bson',
+    'biopython'
     # TODO: put package requirements here
 ]
 
 setup_requirements = [
+    'pytest-runner',
+    'pip',
+    'bumpversion',
+    'wheel',
+    'watchdog',
+    'flake8',
+    'tox',
+    'coverage',
+    'Sphinx',
+    'pytest',
     'pytest-runner',
     # TODO(chrisbarnettster): put setup requirements (distutils extensions, etc.) here
 ]
@@ -28,7 +41,7 @@ test_requirements = [
 
 setup(
     name='tessellate',
-    version='0.3.0',
+    version='0.3.3',
     description="A package for quantifying cyclic molecule conformations.",
     long_description=readme + '\n\n' + history,
     author="Christopher Bevan Barnett",

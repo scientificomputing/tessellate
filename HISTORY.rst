@@ -2,6 +2,10 @@
 History
 =======
 
+0.3.1 (2017-11-24)
+------------------
+* Usecase, documentation update. Update requirements for PyPi.
+
 0.3.0 (2017-11-23)
 ------------------
 * First release on PyPi

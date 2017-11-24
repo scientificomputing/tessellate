@@ -4,7 +4,7 @@
 
 __author__ = """Christopher Bevan Barnett"""
 __email__ = 'chrisbarnettster@gmail.com'
-__version__ = '0.3.0'
+__version__ = '0.3.3'
 
 # . Set up the logger here
 from os import path, remove

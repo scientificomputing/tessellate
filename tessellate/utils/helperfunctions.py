@@ -4,11 +4,11 @@ logger = logging.getLogger(__name__)
 from . import __version__
 
 
-def write_to_json(data, output, the_indent=4):
+def write_to_json(data, output, the_indent=4,input_format="builtin"):
     import json
     j2 = json.dumps(data, indent=the_indent)
     f2 = open(output, 'w')
-    f2.write("tessellate "+ __version__+" json\n")
+    f2.write("tessellate "+ __version__+" json " +input_format+ "\n")
     print(j2, file=f2)
     f2.close()
 

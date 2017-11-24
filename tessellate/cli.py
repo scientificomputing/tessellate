@@ -82,6 +82,12 @@ def main(input_dir, input_format, output_dir, output_format, ignore, ignore_beha
     logger.debug(verbose)
     logger.debug(quiet)
 
+    from sys import version_info
+    pathlib_unsupported=False
+    if version_info.minor < 6:
+        logger.debug("Python 3.4/5 tweaks required for PathLib")
+        pathlib_unsupported=True
+
     # . Check input dir exists
     if input_dir == "" or input_dir == None or len(input_dir)==0:
         logger.critical("No input_dir defined")
@@ -109,6 +115,8 @@ def main(input_dir, input_format, output_dir, output_format, ignore, ignore_beha
             for path in pathlist:
                 try:
                     tail=path.name
+                    if pathlib_unsupported:
+                        path=str(path)
                     tt.analyse_pucker(path, output_dir=output_dir, outputfile="tessellate_report_"+str(tail), output_format=output_format)
                 except:
                     raise
@@ -118,6 +126,8 @@ def main(input_dir, input_format, output_dir, output_format, ignore, ignore_beha
                     tail=path.name
                     logger.critical("PDB standalone, development in progress")
                     exit(1)
+                    if pathlib_unsupported:
+                        path=str(path)
                     tt.analyse_pucker_from_pdbs(path, output_dir=output_dir, outputfile="tessellate_report_"+str(tail), output_format=output_format, ligandinputfilename=ligand_file)
                 except:
                     raise
@@ -126,6 +136,8 @@ def main(input_dir, input_format, output_dir, output_format, ignore, ignore_beha
             for path in pathlist:
                 try:
                     tail=path.name
+                    if pathlib_unsupported:
+                        path=str(path)
                     tt.analyse_pucker_from_pdbs(path, output_dir=output_dir, outputfile="tessellate_report_"+str(tail), output_format=output_format, ligandinputfilename=ligand_file)
                 except:
                     raise
@@ -136,4 +148,8 @@ def main(input_dir, input_format, output_dir, output_format, ignore, ignore_beha
 
 
 if __name__ == "__main__":
+    from sys import version_info
+    if version_info.major < 3:
+        log.critical("Python 2 not supported")
+        exit(1)
     main()
