@@ -86,6 +86,16 @@ def main(input_dir, input_format, output_dir, output_format, ignore, ignore_beha
     if input_dir == "" or input_dir == None or len(input_dir)==0:
         logger.critical("No input_dir defined")
         exit(1)
+
+    #. Check if output dir exists and create
+    if output_dir == "" or output_dir == None or len(output_dir)==0:
+        pass
+    else:
+        try:
+            os.makedirs(output_dir, exist_ok=True)
+        except:
+            raise
+    
     for dirs in input_dir:
         if os.path.isdir(dirs):
             logger.debug("input_dir is a directory")
@@ -106,6 +116,8 @@ def main(input_dir, input_format, output_dir, output_format, ignore, ignore_beha
             for path in pathlist:
                 try:
                     tail=path.name
+                    logger.critical("PDB standalone, development in progress")
+                    exit(1)
                     tt.analyse_pucker_from_pdbs(path, output_dir=output_dir, outputfile="tessellate_report_"+str(tail), output_format=output_format, ligandinputfilename=ligand_file)
                 except:
                     raise

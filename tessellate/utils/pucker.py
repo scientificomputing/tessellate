@@ -9,7 +9,7 @@ except Exception as e:
     exit(1)
 
 logger = logging.getLogger(__name__)
-logger.critical(logger.getEffectiveLevel())
+#logger.critical(logger.getEffectiveLevel())
 
 
 # logger.setLevel(level='DEBUG')

@@ -5,7 +5,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.ERROR)
 from . import __version__
 
 def createnodejson_forcrd(id, conformer, puckercoords, nextconformer, ringsize, numeric):
@@ -260,7 +260,7 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, outputf
                                     logger.error('In known ligs, Pucker object valid, but calc, classify etc. failed  %s %s', str(pobj._coords), e)
                                     raise e
                             else:
-                                logger.error("pobj is None or not valid in ligand ring find %s ", listallcoors)
+                                logger.info("pobj is None or not valid in ligand ring find %s ", listallcoors)
                     except Exception as e:
                         logger.error("pdb file may be missing coordinates..")
                         raise  # not happy about how I raise this error but OK for now
@@ -318,7 +318,7 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, outputf
                                 logger.error('In SSSR Pucker object valid, but calc, classify etc. failed  %s %s', str(pobj._coords), e)
                                 raise e
                         else:
-                            logger.error("pobj is None or not valid in SSSR ring find %s %s %s %s", listallcoors,rname,resi.get_id()[1], ring)
+                            logger.info("pobj is None or not valid in SSSR ring find %s %s %s %s", listallcoors,rname,resi.get_id()[1], ring)
                 else:
                     logger.debug('%s has no rings', rname)
 

@@ -13,7 +13,7 @@ import sys
 import logging.config
 
 
-logging.basicConfig(stream=sys.stdout, level=logging.WARNING,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(stream=sys.stdout, level=logging.ERROR,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 # from tessellate.utils.pucker import Pucker
 
 

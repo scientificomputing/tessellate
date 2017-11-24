@@ -1,7 +1,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.INFO)
 
 #| common class ordering of ring systems for 5,6 rings
 common5rings = [("C2'", "C3'", "C4'", "O4'", "C1'"), ("C2R", "C3R", "C4R", "O4R", "C1R")]
@@ -182,7 +182,7 @@ def getring(startatom, atomset):
                                         break
                         return chosen
                     else:  # ignore path
-                        logger.error("getRING pass on intersection %s is size %i", intersection, len(intersection))
+                        logger.debug("getRING pass on intersection %s is size %i", intersection, len(intersection))
                         pass
             else:
                 logger.debug("subnode=root %s %s", subnodes, root)
@@ -298,7 +298,7 @@ def create_graph_and_find_rings_d3069(atomlist, mineuclid=1.1, maxeuclid=2.0):
                         logger.debug("ring from getring %s", ring)
                         if len(ring) > 0:
                             if ring in SSSR:  # if exists then ignore, not sorting as a unique ring is being offered by getRing
-                                logger.error("ring already in SSSR %s %i %s", ring, len(ring),type(ring))
+                                logger.debug("ring already in SSSR %s %i %s", ring, len(ring),type(ring))
                                 pass
                             else:
                                 SSSR.append(ring)
@@ -310,7 +310,7 @@ def create_graph_and_find_rings_d3069(atomlist, mineuclid=1.1, maxeuclid=2.0):
                             logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
                             edges[bondtobreak].remove(N2)
                         except:
-                            logger.error("N2 not eliminated")
+                            logger.debug("N2 not eliminated")
                             pass
 
                 elif getRing.min_degree(edges)[1] == int(3) and N3nodes:  # the minimum degree of the entire graph
@@ -412,7 +412,7 @@ def create_graph_and_find_rings_old(atomlist, mineuclid=1.1, maxeuclid=2.0):
                             logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
                             edges[bondtobreak].remove(N2)
                         except:
-                            logger.error("Couldn't eliminate N2")
+                            logger.debug("Couldn't eliminate N2")
                             pass
 
                 elif getRing.min_degree(edges)[1] == int(3):  # the minimum degree of the entire graph
@@ -492,7 +492,7 @@ def create_graph_and_find_rings_6abb(atomlist, mineuclid=1.1, maxeuclid=2.0):
                     edges[edges[atom][0]].remove(atom)
                     edges[atom] = []
                     deletededges[atom]=edges[atom]
-                    logger.critical("Deleting atom %s %s",atom, deletededges)
+                    #logger.critical("Deleting atom %s %s",atom, deletededges)
                     del edges[atom]  # cannot delete dictionary while iterating use a while
                 elif int(len(edges[atom])) == int(2):  # find nodes of degree 2 and add to N2 nodes
                     logger.debug("Two edge node %s with %i edges",atom, len(edges[atom]))
