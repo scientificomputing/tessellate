@@ -280,8 +280,22 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, outputf
 
                 for i in resi.get_list():
                     atomlist.append([i.get_name(), i.get_coord()])
-                logger.debug("resi %s atomlist %s", resi, atomlist)
+                logger.debug("resi %s atomlist %s length %s", resi, atomlist, len(atomlist))
                 SSSR = getRing.create_graph_and_find_rings_suite(atomlist,mineuclid=1.0,maxeuclid=2.2)
+                try: # hack to fix this in python3 - working on it
+                    for iidx in range(0,len(atomlist),12):
+                        logger.debug("individual items atomlist %s", atomlist[iidx:iidx+12])
+                        SSSR_item = getRing.create_graph_and_find_rings_suite(atomlist[iidx:iidx+12],mineuclid=1.0,maxeuclid=2.2)
+                        logger.debug("individual items %s", SSSR_item)
+                        if SSSR_item in SSSR:
+                            pass
+                        else:
+                            SSSR.extend(SSSR_item)
+                            logger.debug("Extending SSSR %s", SSSR_item)
+                except Exception as e:
+                    logger.error("Error in SSSR extend %s",e)
+                        
+                logger.error("SSSR rings %s", SSSR)
 
                 if SSSR:
                     for ring in SSSR:
@@ -325,6 +339,7 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, outputf
             #. get all rings in this resi, get com
             macroatomlist = []
             if SSSR:
+                logger.debug("SSSR possible macro list %s %s",pdbid,SSSR)
                 for aring in SSSR:
                     ringcoords=[]
                     for ringatom in aring:
@@ -343,7 +358,7 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, outputf
                     #for a, b in itertools.combinations(macroatomlist, 2):
                     # work out euclidean distance and choose to call this an edge if mineuclid<dist<maxeuclid
                         #print a, b, np.linalg.norm(a[1] - b[1])
-                    logger.debug("Macroatoms list %s",macroatomlist)
+                    logger.debug("Macroatoms list %s %s",pdbid, macroatomlist)
                     macroSSSR = getRing.create_graph_and_find_rings_suite(macroatomlist,maxeuclid=8.0)
                     logger.debug(macroSSSR)
                     if macroSSSR:

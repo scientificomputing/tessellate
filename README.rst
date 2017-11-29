@@ -19,30 +19,55 @@ A package for quantifying cyclic molecule conformations.
 Using
 -----
 
-`make install; tessellate  data/example-builtin --input-format=builtin --output-format=json `
-`make install; tessellate  data/*DNA --input-format=pdblist --output-format=json `
+.. code:: bash
+
+    make install; tessellate  data/example-builtin --input-format=builtin --output-format=json
+    make install; tessellate  data/*DNA --input-format=pdblist --output-format=json
+
+Installing
+----------
+- Use Python3. For example, Anaconda Python https://www.anaconda.com/download/ https://repo.continuum.io/archive/Anaconda3-5.0.1-Linux-x86_64.sh
+- Use a virtual environment or conda environment.
+- Install with pip or compile the source code
+
+.. code:: bash
+
+    # installing with pip
+    pip install tessellate
+
+    # Alternatively: compile from source
+    make install
+
 
 Usecase 1 - timeseries data
 ---------------------------
 
-`make install; tessellate  data/usecase-timeseries --input-format=builtin --output-format=json --output-dir=output-usecase-timeseries`
+.. code:: bash
+
+    tessellate  data/usecase-timeseries --input-format=builtin --output-format=json --output-dir=output-usecase-timeseries
 
 Usecase 2 - RNA and DNA
 -----------------------
-`make install; tessellate  data/usecase-*DNA --input-format=pdblist --output-format=json --output-dir=output-usecase-rnadna`
+
+.. code:: bash
+
+    tessellate  data/usecase-*DNA --input-format=pdblist --output-format=json --output-dir=output-usecase-rnadna
 
 Usecase 3 - Alpha Cyclodextrin
 ------------------------------
-`make install; tessellate  data/usecase-*CD --input-format=pdblist --output-format=json --output-dir=output-usecase-cyclodextrin`
+
+.. code:: bash
+
+    tessellate  data/usecase-*CD --input-format=pdblist --output-format=json --output-dir=output-usecase-cyclodextrin
 
 Run All Usecases
 ----------------
 
-```
-tessellate  data/usecase-timeseries --input-format=builtin --output-format=json --output-dir=output-usecase-timeseries
-tessellate  data/usecase-*DNA --input-format=pdblist --output-format=json --output-dir=output-usecase-rnadna
-tessellate  data/usecase-*CD --input-format=pdblist --output-format=json --output-dir=output-usecase-cyclodextrin
-```
+.. code:: bash
+
+    tessellate  data/usecase-timeseries --input-format=builtin --output-format=json --output-dir=output-usecase-timeseries
+    tessellate  data/usecase-*DNA --input-format=pdblist --output-format=json --output-dir=output-usecase-rnadna
+    tessellate  data/usecase-*CD --input-format=pdblist --output-format=json --output-dir=output-usecase-cyclodextrin
 
 
 Viewing Data
@@ -50,20 +75,17 @@ Viewing Data
 
 Try out Montage to create reports for these datasets.
 For example:
-```
-USECASE_DATA=output-usecase-cyclodextrin
-multiqc $USECASE_DATA -m comp_tessellate -f  # -f to overwrite existing reports
-google-chrome multiqc_report.html
-```
 
-Compare all outputs
-```
-multiqc output* -m comp_tessellate -f  # -f to overwrite existing reports
-google-chrome multiqc_report.html
-```
+.. code:: bash
+    USECASE_DATA=output-usecase-cyclodextrin
+    multiqc $USECASE_DATA -m comp_tessellate -f  # -f to overwrite existing reports
+    google-chrome multiqc_report.html
 
+Compare all outputs:
 
-
+.. code:: bash
+    multiqc output* -m comp_tessellate -f  # -f to overwrite existing reports
+    google-chrome multiqc_report.html
 
 
 Features

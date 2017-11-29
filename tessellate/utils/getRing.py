@@ -3,6 +3,22 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+class dd_dict(dict):    # the dd is for "deferred delete"
+    _deletes = None
+    def __delitem__(self, key):
+        if key not in self:
+            raise KeyError(str(key))
+        dict.__delitem__(self, key) if self._deletes is None else self._deletes.add(key)
+    def __enter__(self):
+        self._deletes = set()
+    def __exit__(self, type, value, tb):
+        for key in self._deletes:
+            try:
+                dict.__delitem__(self, key)
+            except KeyError:
+                pass
+        self._deletes = None
+
 #| common class ordering of ring systems for 5,6 rings
 common5rings = [("C2'", "C3'", "C4'", "O4'", "C1'"), ("C2R", "C3R", "C4R", "O4R", "C1R")]
 common6rings = [("C3'", "C4'", "C5'", "O5'", "C1'", "C2'"), ("C3A", "C4A", "C5A", "O5A", "C1A", "C2A"),
@@ -335,6 +351,84 @@ def create_graph_and_find_rings_d3069(atomlist, mineuclid=1.1, maxeuclid=2.0):
                         except Exception as e:
                             logger.error(e)
                             print(e)
+
+
+#    if edges != []:
+#        while edges:
+#            #currentkeyset=list(edges.keys())
+#            for atom in list(edges.keys()):
+#                N2nodes = []
+#                N3nodes = []
+#                logger.debug("all edge keys %s",edges.keys())
+#                logger.debug("deleted edge keys %s",deletededges.keys())
+#                logger.debug("Current edge %s",atom)
+#                if atom in deletededges.keys():
+#                    logger.critical("revisiting a deleted edge")
+#                    exit(1)
+#                if int(len(edges[atom])) == int(0):  # trim degree zero nodes
+#                    logger.debug("Zero edge node deleted %s",atom)
+#                    deletededges[atom]=edges[atom]
+#                    del edges[atom]  # cannot delete dictionary while iterating use a while
+#                    continue
+#                elif int(len(edges[atom])) == int(1):  # trim degree one nodes
+#                    # pop it from other atoms
+#                    logger.debug("One edge node %s with %i edges %s removed from parent node edges list %s",atom, len(edges[atom]),edges[atom],edges[edges[atom][0]])
+#                    edges[edges[atom][0]].remove(atom)
+#                    edges[atom] = []
+#                    deletededges[atom]=edges[atom]
+#                    del edges[atom]  # cannot delete dictionary while iterating use a while
+#                    continue
+#                elif int(len(edges[atom])) == int(2):  # find nodes of degree 2 and add to N2 nodes
+#                    logger.debug("Two edge node %s with %i edges",atom, len(edges[atom]))
+#                    N2nodes.append(atom)
+#                elif int(len(edges[atom])) == int(3):  # find nodes of degree 2 and add to N3 nodes
+#                    logger.debug("Three edge node %s with %i edges",atom, len(edges[atom]))
+#                    N3nodes.append(atom)
+#
+#                if getRing.min_degree(edges)[1] == int(2) and N2nodes:  # the minimum degree of the entire graph
+#                    logger.debug("current min degree %i", getRing.min_degree(edges)[1] )
+#                    for N2 in N2nodes:
+#                        ring = getRing.getring(N2, alledges)  # give this ring the entire graph
+#                        logger.debug("ring from getring %s", ring)
+#                        if len(ring) > 0:
+#                            if ring in SSSR:  # if exists then ignore, not sorting as a unique ring is being offered by getRing
+#                                logger.debug("ring already in SSSR %s %i %s", ring, len(ring),type(ring))
+#                                pass
+#                            else:
+#                                SSSR.append(ring)
+#                        else:
+#                            pass
+#                        try: # try isolate and eliminate one N2 node
+#                            logger.debug("isolate N2 node %s with %i edges and break one bond ", N2, len(edges[N2]) )
+#                            bondtobreak=edges[N2].pop()
+#                            logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
+#                            edges[bondtobreak].remove(N2)
+#                        except:
+#                            logger.debug("N2 not eliminated")
+#                            pass
+#
+#                elif getRing.min_degree(edges)[1] == int(3) and N3nodes:  # the minimum degree of the entire graph
+#                    logger.debug("current min degree %i", getRing.min_degree(edges)[1] )
+#                    logger.debug("N3 d3069")
+#                    for N3 in N3nodes:
+#                        ring = getRing.getring(N3, alledges)  # give this ring the entire graph
+#                        logger.debug("ring from getring %s", ring)
+#                        if len(ring) > 0:
+#                            if ring in SSSR:  # if exists then ignore, not sorting as a unique ring is being offered by getRing
+#                                logger.debug("ring already in SSSR %s %i %s", ring, len(ring),type(ring))
+#                                pass
+#                            else:
+#                                SSSR.append(ring)
+#                        else:
+#                            pass
+#                        try: # try isolate and eliminate one N3 node
+#                            logger.debug("isolate N3 node %s with %i edges and break one bond ", N3, len(edges[N3]) )
+#                            bondtobreak=edges[N3].pop()
+#                            logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
+#                            edges[bondtobreak].remove(N3)
+#                        except Exception as e:
+#                            logger.error(e)
+#                            print(e)
     if SSSR:
         logger.debug("SSSR %s", SSSR)
     return SSSR
@@ -538,6 +632,76 @@ def create_graph_and_find_rings_6abb(atomlist, mineuclid=1.1, maxeuclid=2.0):
                     except Exception as e:
                         logger.error(e)
                         print(e)
+
+#    if edges != []:
+#        while edges:
+#            N2nodes = []
+#            N3nodes = []
+#            #for atom in dict(edges).keys():
+#            for atom in list(edges.keys()):
+#                logger.debug("all edge keys %s",edges.keys())
+#                logger.debug("deleted edge keys %s",deletededges.keys())
+#                logger.debug("Current edge %s",atom)
+#                if atom in deletededges.keys():
+#                    logger.critical("revisiting a deleted edge")
+#                    exit(1)
+#
+#                if int(len(edges[atom])) == int(0):  # trim degree zero nodes
+#                    logger.debug("Zero edge node deleted %s",atom)
+#                    deletededges[atom]=edges[atom]
+#                    del edges[atom]  # cannot delete dictionary while iterating use a while
+#                elif int(len(edges[atom])) == int(1):  # trim degree one nodes
+#                    # pop it from other atoms
+#                    logger.debug("One edge node %s with %i edges %s removed from parent node edges list %s",atom, len(edges[atom]),edges[atom],edges[edges[atom][0]])
+#                    edges[edges[atom][0]].remove(atom)
+#                    edges[atom] = []
+#                    deletededges[atom]=edges[atom]
+#                    #logger.critical("Deleting atom %s %s",atom, deletededges)
+#                    del edges[atom]  # cannot delete dictionary while iterating use a while
+#                elif int(len(edges[atom])) == int(2):  # find nodes of degree 2 and add to N2 nodes
+#                    logger.debug("Two edge node %s with %i edges",atom, len(edges[atom]))
+#                    N2nodes.append(atom)
+#                elif int(len(edges[atom])) == int(3):  # find nodes of degree 2 and add to N3 nodes
+#                    logger.debug("Three edge node %s with %i edges",atom, len(edges[atom]))
+#                    N3nodes.append(atom)
+#
+#            if getRing.min_degree(edges)[1] == int(2) and N2nodes:  # the minimum degree of the entire graph
+#                logger.debug("current min degree %i", getRing.min_degree(edges)[1] )
+#                for N2 in N2nodes:
+#                    ring = getRing.getring(N2, alledges)  # give this ring the entire graph
+#                    logger.debug("ring from getring %s", ring)
+#                    if len(ring) > 0:
+#                        if ring in SSSR:  # if exists then ignore, not sorting as a unique ring is being offered by getRing
+#                            logger.debug("ring already in SSSR %s %i %s", ring, len(ring),type(ring))
+#                        else:
+#                            SSSR.append(ring)
+#                logger.debug("isolate N2 node %s with %i edges and break one bond ", N2nodes[0], len(edges[N2nodes[0]]) )
+#                bondtobreak=edges[N2nodes[0]].pop(0)
+#                logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
+#                edges[bondtobreak].remove(N2nodes[0])
+#
+#            elif getRing.min_degree(edges)[1] == int(3) and N3nodes:  # the minimum degree of the entire graph
+#                logger.debug("current min degree %i", getRing.min_degree(edges)[1] )
+#                logger.debug("N3 6abb")
+#                for N3 in N3nodes:
+#                    ring = getRing.getring(N3, alledges)  # give this ring the entire graph
+#                    logger.debug("ring from getring %s", ring)
+#                    if len(ring) > 0:
+#                        if ring in SSSR:  # if exists then ignore, not sorting as a unique ring is being offered by getRing
+#                            logger.debug("ring already in SSSR %s %i %s", ring, len(ring),type(ring))
+#                            pass
+#                        else:
+#                            SSSR.append(ring)
+#                    else:
+#                        pass
+#                    try: # try isolate and eliminate one N3 node
+#                        logger.debug("isolate N3 node %s with %i edges and break one bond ", N3, len(edges[N3]) )
+#                        bondtobreak=edges[N3].pop()
+#                        logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
+#                        edges[bondtobreak].remove(N3)
+#                    except Exception as e:
+#                        logger.error(e)
+#                        print(e)
     if SSSR:
         logger.debug("SSSR %s", SSSR)
     return SSSR
