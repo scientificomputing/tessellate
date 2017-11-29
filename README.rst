@@ -108,10 +108,19 @@ To bump from x.y.z to x.y.a use patch as the part:
 Uploading to PyPi
 -----------------
 Use twine
-conda install -c conda-forge twine
-make install
-make dist
-twine upload dist/*
+
+.. code:: bash
+    conda install -c conda-forge twine
+    make install
+    make dist
+    twine upload dist/*
+
+Issues
+------
+Report Issues at https://github.com/scientificomputing/tessellate/issues 
+Known issue - only relative paths supported
+
+
 
 Read the Docs
 -------------

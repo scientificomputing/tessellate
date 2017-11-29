@@ -2,7 +2,11 @@
 History
 =======
 
-0.3.1 (2017-11-24)
+0.3.4 (2017-11-29)
+------------------
+* Documentation update. Ring finder update
+
+0.3.1 0.3.2 0.3.3  (2017-11-24)
 ------------------
 * Usecase, documentation update. Update requirements for PyPi.
 
