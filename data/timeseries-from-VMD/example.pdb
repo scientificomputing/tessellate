@@ -1,0 +1,35 @@
+CRYST1    1.000    1.000    1.000  90.00  90.00  90.00 P 1           1
+ATOM      1  O4' RNGQG   1      -0.281   2.379   1.331  0.00  0.00      GUAN  
+ATOM      2  C4' RNGQG   1       0.683   3.452   1.173  0.00  0.00      GUAN  
+ATOM      3 H42' RNGQG   1       0.845   3.788   2.250  0.00  0.00      GUAN  
+ATOM      4  C1' RNGQG   1       0.309   1.066   1.440  0.00  0.00      GUAN  
+ATOM      5 H12' RNGQG   1       0.530   0.733   2.434  0.00  0.00      GUAN  
+ATOM      6 H21' RNGQG   1       1.770   0.938  -0.264  0.00  0.00      GUAN  
+ATOM      7  C2' RNGQG   1       1.694   1.338   0.770  0.00  0.00      GUAN  
+ATOM      8  O2' RNGQG   1       2.723   0.791   1.585  0.00  0.00      GUAN  
+ATOM      9 H22' RNGQG   1       2.358   0.083   2.195  0.00  0.00      GUAN  
+ATOM     10  N9  RNGQG   1      -0.528   0.170   0.682  0.00  0.00      GUAN  
+ATOM     11  C4  RNGQG   1      -0.707   0.204  -0.699  0.00  0.00      GUAN  
+ATOM     12  N3  RNGQG   1      -0.414   1.215  -1.580  0.00  0.00      GUAN  
+ATOM     13  C2  RNGQG   1      -0.797   0.985  -2.866  0.00  0.00      GUAN  
+ATOM     14  N1  RNGQG   1      -1.337  -0.204  -3.281  0.00  0.00      GUAN  
+ATOM     15  H1  RNGQG   1      -1.609  -0.411  -4.262  0.00  0.00      GUAN  
+ATOM     16  N2  RNGQG   1      -0.706   2.022  -3.773  0.00  0.00      GUAN  
+ATOM     17  H21 RNGQG   1      -1.132   1.982  -4.704  0.00  0.00      GUAN  
+ATOM     18  H22 RNGQG   1      -0.467   2.975  -3.468  0.00  0.00      GUAN  
+ATOM     19  C6  RNGQG   1      -1.622  -1.302  -2.356  0.00  0.00      GUAN  
+ATOM     20  O6  RNGQG   1      -2.124  -2.313  -2.871  0.00  0.00      GUAN  
+ATOM     21  C5  RNGQG   1      -1.273  -1.011  -1.046  0.00  0.00      GUAN  
+ATOM     22  N7  RNGQG   1      -1.467  -1.757   0.103  0.00  0.00      GUAN  
+ATOM     23  C8  RNGQG   1      -0.999  -1.058   1.160  0.00  0.00      GUAN  
+ATOM     24  H8  RNGQG   1      -1.058  -1.358   2.170  0.00  0.00      GUAN  
+ATOM     25 H31' RNGQG   1       2.193   3.138  -0.470  0.00  0.00      GUAN  
+ATOM     26  C3' RNGQG   1       1.972   2.859   0.607  0.00  0.00      GUAN  
+ATOM     27  O3' RNGQG   1       3.027   3.269   1.460  0.00  0.00      GUAN  
+ATOM     28 H32' RNGQG   1       3.375   2.441   1.905  0.00  0.00      GUAN  
+ATOM     29  C5' RNGQG   1      -0.054   4.538   0.362  0.00  0.00      GUAN  
+ATOM     30 H51' RNGQG   1       0.513   5.475   0.229  0.00  0.00      GUAN  
+ATOM     31 H52' RNGQG   1      -1.062   4.869   0.871  0.00  0.00      GUAN  
+ATOM     32  O5' RNGQG   1      -0.348   4.007  -0.940  0.00  0.00      GUAN  
+ATOM     33  H5T RNGQG   1      -0.601   3.065  -0.877  0.00  0.00      GUAN  
+END

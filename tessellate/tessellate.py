@@ -295,7 +295,7 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, outputf
                 except Exception as e:
                     logger.error("Error in SSSR extend %s",e)
                         
-                logger.error("SSSR rings %s", SSSR)
+                logger.debug("SSSR rings %s", SSSR)
 
                 if SSSR:
                     for ring in SSSR:

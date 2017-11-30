@@ -46,6 +46,9 @@ Usecase 1 - timeseries data
 
     tessellate  data/usecase-timeseries --input-format=builtin --output-format=json --output-dir=output-usecase-timeseries
 
+This data is from an in vacuo ribose simulation stored in data/timeseries-from-VMD
+To recreate data use the run.sh script. This calls VMD and runs pucker-bigdcd.tcl.
+
 Usecase 2 - RNA and DNA
 -----------------------
 
@@ -88,14 +91,6 @@ Compare all outputs:
     google-chrome multiqc_report.html
 
 
-Features
---------
-
-* Improve testing and documentation. Port existing tests over. 
-* Tables
-* Merge in tcl scripts and VMD examples
-
-
 Development
 -----------
 Bump version numbers using bumpversion
@@ -104,6 +99,13 @@ X=thecurrentversion
 
 To bump from x.y.z to x.y.a use patch as the part:
 `bumpversion  --current-version X patch`
+
+Features to include:
+--------------------
+
+* Improve testing and documentation. Port existing tests over. 
+* Tables
+* include more RAD functionality
 
 Uploading to PyPi
 -----------------
