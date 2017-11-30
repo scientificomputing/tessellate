@@ -41,7 +41,7 @@ test_requirements = [
 
 setup(
     name='tessellate',
-    version='0.3.4',
+    version='0.3.5',
     description="A package for quantifying cyclic molecule conformations.",
     long_description=readme + '\n\n' + history,
     author="Christopher Bevan Barnett",
