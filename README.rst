@@ -10,6 +10,9 @@ Tessellate
         :target: https://tessellate.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1068656.svg
+   :target: https://doi.org/10.5281/zenodo.1068656
+   
 A package for quantifying cyclic molecule conformations.
 
 
