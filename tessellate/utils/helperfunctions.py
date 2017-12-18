@@ -1,4 +1,5 @@
 import logging
+import collections
 
 logger = logging.getLogger(__name__)
 from . import __version__
@@ -6,7 +7,14 @@ from . import __version__
 
 def write_to_json(data, output, the_indent=4,input_format="builtin"):
     import json
-    j2 = json.dumps(data, indent=the_indent)
+    from operator import itemgetter
+    #. create ordered dicts from dicts
+    sdata=[]
+    while len(data)>0:
+        d=data.pop()
+        sdata.append(collections.OrderedDict(sorted(d.items(), key=lambda t: t[0])))
+    #.  sort the list by pdbid, chain, resid, then conformer
+    j2 = json.dumps(sorted(sdata,key=itemgetter('pdbid','chain','resid','conformer')), indent=the_indent)
     f2 = open(output, 'w')
     f2.write("tessellate "+ __version__+" json " +input_format+ "\n")
     print(j2, file=f2)
