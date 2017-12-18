@@ -344,13 +344,14 @@ def create_graph_and_find_rings_d3069(atomlist, mineuclid=1.1, maxeuclid=2.0):
                         else:
                             pass
                         try: # try isolate and eliminate one N3 node
-                            logger.debug("isolate N3 node %s with %i edges and break one bond ", N3, len(edges[N3]) )
-                            bondtobreak=edges[N3].pop()
-                            logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
-                            edges[bondtobreak].remove(N3)
+                            if len(edges[N3])>1:
+                                logger.debug("isolate N3 node %s with %i edges and break one bond ", N3, len(edges[N3]) )
+                                bondtobreak=edges[N3].pop()
+                                logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
+                                edges[bondtobreak].remove(N3)
                         except Exception as e:
                             logger.error(e)
-                            print(e)
+                            raise e
 
 
 #    if edges != []:
@@ -625,13 +626,14 @@ def create_graph_and_find_rings_6abb(atomlist, mineuclid=1.1, maxeuclid=2.0):
                     else:
                         pass
                     try: # try isolate and eliminate one N3 node
-                        logger.debug("isolate N3 node %s with %i edges and break one bond ", N3, len(edges[N3]) )
-                        bondtobreak=edges[N3].pop()
-                        logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
-                        edges[bondtobreak].remove(N3)
+                        if len(edges[N3])>1:
+                            logger.debug("isolate N3 node %s with %i edges and break one bond ", N3, len(edges[N3]) )
+                            bondtobreak=edges[N3].pop()
+                            logger.debug("break %s with current edges %s ", bondtobreak, edges[bondtobreak] )
+                            edges[bondtobreak].remove(N3)
                     except Exception as e:
                         logger.error(e)
-                        print(e)
+                        raise e
 
 #    if edges != []:
 #        while edges:
