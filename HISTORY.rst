@@ -2,6 +2,12 @@
 History
 =======
 
+0.3.6 (2017-12-18)
+------------------
+* Zenodo DOI
+* empty list bug resolved 
+* feature order json output
+
 0.3.5 (2017-11-30)
 ------------------
 * Includes tcl script for VMD and example data
