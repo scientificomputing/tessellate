@@ -75,6 +75,12 @@ Run All Usecases
     tessellate  data/usecase-*DNA --input-format=pdblist --output-format=json --output-dir=output-usecase-rnadna
     tessellate  data/usecase-*CD --input-format=pdblist --output-format=json --output-dir=output-usecase-cyclodextrin
 
+Additional UseCases
+-------------------
+
+- `Pandas Dataframes`_  Supported with --output-format=pandas
+- `Using Tessellate as a library`_
+
 
 Viewing Data
 ------------
@@ -129,11 +135,47 @@ Known issue - only relative paths supported
 
 Read the Docs
 -------------
-Docs are here. RTD is authorised to acces GitHub repos. The RTD service hook builds doc on push.
+Docs are here. RTD is authorised to access GitHub repos. The RTD service hook builds doc on push.
+
+
+Pandas Dataframes
+-----------------
+.. code:: bash
+
+    tessellate  data/usecase-timeseries --input-format=builtin --output-format=pandas --output-dir=output-usecase-timeseries
+
+.. code:: python 
+    python
+    import pandas as pd
+    df = pd.read_json('output-usecase-timeseries/tessellate_report_usecase-timeseries.pandas.json')
+    df.head()
+    df.groupby('conformer').count()
+    df.groupby(['ringsize','conformer']).count()
+
+Using Tessellate as a library
+-----------------------------
+
+.. code:: python
+    import tessellate as t
+    import tessellate.utils.pucker as p
+    import collections
+    ordered_ringatoms=['C3','C4','C5','O5','C1','C2']
+    frame={'C1': (-5.799, -5.308, 4.847), 'C2': (-5.383, -5.328, 3.394), 'C3': (-3.904, -4.906, 3.181),'C4': (-3.576, -3.54, 3.944), 'C5': (-4.115, -3.556, 5.339), 'O5': (-5.551, -3.941, 5.38)}
+    def return_pucker(atomids,frame):
+     import tessellate as t
+     import tessellate.utils.pucker as p
+     import itertools
+     a=[frame[i] for i in atomids]
+     pobj=p.Pucker(tuple(itertools.chain.from_iterable(a)))
+     return pobj.calculate_triangular_tessellation(), pobj.deduce_canonical_conformation()[0],pobj.deduce_canonical_conformation()[-1],pobj.deduce_canonical_conformation(nextguess=True)[0]
+    
+    result=collections.OrderedDict()
+    result["pucker"],result["pucker_conformer"],result["pucker_distance_to_canonical"],result["pucker_next_guess"] = return_pucker(ordered_ringatoms, frame)
+    import pprint
+    pprint.pprint(result)
 
 Credits
 ---------
-
 
 This package incorporates work from existing packages (all originally developed by Chris B. Barnett.)
 * https://bitbucket.org/scientificomputing/triangular-tessellation-class http://git.cem.uct.ac.za/analysis-pucker/triangular-tessellation-class

@@ -24,9 +24,9 @@ import click
               help="Output directory"
               )
 @click.option('--output-format',
-              type=click.Choice(['txt', 'json', 'bson']),
-              default="json",
-              help="Output format: txt, json, bson"
+              type=click.Choice(['txt', 'json', 'bson','pandas']),
+              default="pandas",
+              help="Output format: txt, json, bson, pandas"
               )
 @click.option('--ignore/--no-ignore', default=True,
               help="Choose to ignore amino acids/water in PDB data when looking for cycles")

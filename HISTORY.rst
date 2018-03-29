@@ -2,6 +2,16 @@
 History
 =======
 
+0.3.7 (2018-03-29)
+------------------
+* Pandas! 
+* Pandas dataframe output in json and csv is the default
+* make Pandas default
+* how to use a library example in the README
+* biopython and pytest have different signatures beneath a certain version. Fixed this in setup.py
+* removed hardcoded python interpreter, in some cases machine point to python2.7 with python3 pointing to 3. Remove in *.py files. Removed in Makefile. To use another python in the make file, modify the pythonexe variable
+* Tested with --user flag. --user flag seems to work for me - e.g. pip3 install --user tessellate
+
 0.3.6 (2017-12-18)
 ------------------
 * Zenodo DOI

@@ -113,6 +113,9 @@ def analyse_pucker(inputfile, output_dir="", outputfile="tessellate_report", out
     elif output_format == "bson":
         d2 = [key for key in nodejson]
         helperfunctions.write_to_bson(d2, os.path.join(output_dir, outputfile))
+    if output_format == "pandas":
+        d2 = [key for key in nodejson]
+        helperfunctions.write_to_pandas_dataframe(d2, os.path.join(output_dir, outputfile))
 
 
 
@@ -411,6 +414,12 @@ def analyse_pucker_from_pdbs(pdbinputfilename, ligandinputfilename=None, outputf
     if output_format == "json":
         d2 = [key for key in nodejson]
         helperfunctions.write_to_json(d2, os.path.join(output_dir, outputfile),input_format="pdblist")
+    elif output_format == "bson":
+        d2 = [key for key in nodejson]
+        helperfunctions.write_to_bson(d2, os.path.join(output_dir, outputfile))
+    elif output_format == "pandas":
+        d2 = [key for key in nodejson]
+        helperfunctions.write_to_pandas_dataframe(d2, os.path.join(output_dir, outputfile))
 
     inputfile.close()
 

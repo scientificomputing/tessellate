@@ -1,3 +1,6 @@
 numpy
 bson
-biopython
+biopython>=1.70
+pytest
+pandas
+Click>=6.0

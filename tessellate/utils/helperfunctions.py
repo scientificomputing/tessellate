@@ -11,10 +11,14 @@ def write_to_json(data, output, the_indent=4,input_format="builtin"):
     #. create ordered dicts from dicts
     sdata=[]
     while len(data)>0:
-        d=data.pop()
+        d=data.pop() # note this is bad, as original dict is modified
         sdata.append(collections.OrderedDict(sorted(d.items(), key=lambda t: t[0])))
-    #.  sort the list by pdbid, chain, resid, then conformer
-    j2 = json.dumps(sorted(sdata,key=itemgetter('pdbid','chain','resid','conformer')), indent=the_indent)
+    if input_format=="builtin":
+        j2 = json.dumps(sorted(sdata,key=itemgetter('pdbid','conformer')), indent=the_indent)
+
+    else:
+        #.  sort the list by pdbid, chain, resid, then conformer
+        j2 = json.dumps(sorted(sdata,key=itemgetter('pdbid','chain','resid','conformer')), indent=the_indent)
     f2 = open(output, 'w')
     f2.write("tessellate "+ __version__+" json " +input_format+ "\n")
     print(j2, file=f2)
@@ -31,6 +35,17 @@ def write_to_bson(data, output):
     f2 = open(output, 'w')
     print(j2, file=f2)
     f2.close()
+
+def write_to_pandas_dataframe(data, output, the_indent=4,input_format="builtin"):
+    import pandas as pd
+    dataframe=pd.DataFrame.from_dict(data) 
+    pandas_output_format='csv'
+    pandasoutput = ".".join([output, pandas_output_format])
+    dataframe.to_csv(pandasoutput)
+    pandas_output_format='json'
+    pandasoutput = ".".join([output, pandas_output_format])
+    dataframe.to_json(pandasoutput)
+    #print(dataframe)
 
 import colorsys
 

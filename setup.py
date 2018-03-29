@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """The setup script."""
@@ -15,9 +14,12 @@ requirements = [
     'Click>=6.0',
     'numpy',
     'bson',
-    'biopython'
-    # TODO: put package requirements here
+    'biopython>=1.70',
+    'pandas',
+    'pytest'
+    # NOTE- manually mirrored in requirements.txt 
 ]
+
 
 setup_requirements = [
     'pytest-runner',
@@ -30,8 +32,8 @@ setup_requirements = [
     'coverage',
     'Sphinx',
     'pytest',
-    'pytest-runner',
-    # TODO(chrisbarnettster): put setup requirements (distutils extensions, etc.) here
+    'pytest-runner'
+    # NOTE- manually mirrored in requirements_dev.txt 
 ]
 
 test_requirements = [
